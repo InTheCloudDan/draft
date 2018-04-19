@@ -372,7 +372,6 @@ func (b *Builder) saveState(app *AppContext) {
 // buildImg builds the docker image.
 func (b *Builder) buildImg(ctx context.Context, app *AppContext, out chan<- *Summary) (err error) {
 	const stageDesc = "Building Docker Image"
-
 	defer complete(app.id, stageDesc, out, &err)
 	summary := summarize(app.id, stageDesc, out)
 
@@ -383,6 +382,27 @@ func (b *Builder) buildImg(ctx context.Context, app *AppContext, out chan<- *Sum
 	errc := make(chan error)
 	go func() {
 		buildopts := types.ImageBuildOptions{Tags: app.tags}
+		logrus.WithFields(logrus.Fields{
+			"Tags": buildopts.Tags,
+			"SuppressOutput": buildopts.SuppressOutput,
+			"RemoteContext": buildopts.RemoteContext,
+			"NoCache": buildopts.NoCache,
+			"Remove": buildopts.Remove,
+			"ForceRemove": buildopts.ForceRemove,
+			"PullParent": buildopts.PullParent,
+			"Isolation": buildopts.Isolation,
+			"CPUSetCPUs": buildopts.CPUSetCPUs,
+			"CPUSetMems": buildopts.CPUSetMems,
+			"CPUShares": buildopts.CPUShares,
+			"CPUQuota": buildopts.CPUQuota,
+			"CPUPeriod": buildopts.CPUPeriod,
+			"Memory": buildopts.Memory,
+			"MemorySwap": buildopts.MemorySwap,
+			"CgroupParent": buildopts.CgroupParent,
+			"NetworkMode": buildopts.NetworkMode,
+			"ShmSize": buildopts.ShmSize,
+			"Dockerfile": buildopts.Dockerfile,
+			"Ulimits": buildopts.Ulimits}).Debug("Docker Image Builder fields:")
 		resp, err := b.DockerClient.Client().ImageBuild(ctx, app.buf, buildopts)
 		if err != nil {
 			errc <- err
